@@ -29,9 +29,9 @@ app.use("/categories", categoryRouter);
 
 // association
 Post.belongsTo(Category, { constraints: true, onDelete: "CASCADE" }); // 삭제될 경우 연결된 테이블 내용도 삭제
-Category.hasMany(Post);
+Category.hasMany(Post, { foreignKey: "categoryId" }); // foreignKey를 설정해야 model의 왜래 키를 인식한다.
 Choice.belongsTo(Post, { constraints: true, onDelete: "CASCADE" });
-Post.hasMany(Choice);
+Post.hasMany(Choice, { foreignKey: "postId" }); // foreignKey를 설정해야 model의 왜래 키를 인식한다.
 
 const handleListening = () =>
     console.log(`✅ Server listenting on port http://localhost:${PORT} 🚀`);
