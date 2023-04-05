@@ -24,7 +24,7 @@ export const getAllPosts = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -42,7 +42,7 @@ export const getPostsAboutCategory = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -52,6 +52,17 @@ export const getPost = async (req: Request, res: Response) => {
     try {
         const post = await Post.findByPk(postId, {
             // 왜래키로 연결된 데이터 필드 가져오기
+            attributes: [
+                "id",
+                "categoryId",
+                "title",
+                "choice1",
+                "choice1Url",
+                "choice2",
+                "choice2Url",
+                "uploaderId",
+                "createdAt",
+            ],
             include: [
                 {
                     model: Choice, // join할 모델
@@ -61,7 +72,7 @@ export const getPost = async (req: Request, res: Response) => {
         });
         return res.status(200).json(post);
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -100,10 +111,10 @@ export const uploadPost = async (req: Request, res: Response) => {
             uploaderId,
             categoryId: finalCateogoryId,
         });
+        console.log(result);
         return res.status(201).send("게시글 업로드 성공");
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -118,7 +129,7 @@ export const getUserPosts = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -139,7 +150,7 @@ export const deletePost = async (req: Request, res: Response) => {
                 result ? "게시글 삭제 성공" : "해당 게시글이 존재하지 않습니다."
             );
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -160,7 +171,7 @@ export const getChoice = async (req: Request, res: Response) => {
         });
         return res.status(200).json(choiceTypeObj);
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -188,7 +199,7 @@ export const postChoice = async (req: Request, res: Response) => {
         });
         return res.status(201).send(created ? `선택 완료` : "변경 완료");
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
 
@@ -207,6 +218,6 @@ export const cancelChoice = async (req: Request, res: Response) => {
         });
         return res.status(200).send("취소 완료");
     } catch (error) {
-        return res.status(500).send(`알 수 없는 에러가 발생했습니다.`);
+        return res.status(500).send({ message: error });
     }
 };
