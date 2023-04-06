@@ -10,7 +10,7 @@ import {
     postChoice,
     uploadPost,
 } from "../controllers/postController";
-import { decodeToken, uploadFiles } from "../middlewares";
+import { decodeToken, deleteAWSImage, uploadFiles } from "../middlewares";
 
 const postRouter = express.Router();
 
@@ -32,6 +32,9 @@ postRouter
     .get(decodeToken, getChoice)
     .post(decodeToken, postChoice)
     .delete(decodeToken, cancelChoice);
-postRouter.route("/:postId").get(getPost).delete(decodeToken, deletePost);
+postRouter
+    .route("/:postId")
+    .get(getPost)
+    .delete(decodeToken, deleteAWSImage, deletePost);
 
 export default postRouter;

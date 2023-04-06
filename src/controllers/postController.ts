@@ -135,10 +135,7 @@ export const getUserPosts = async (req: Request, res: Response) => {
 
 export const deletePost = async (req: Request, res: Response) => {
     const postId = req.params.postId;
-    if (!postId) return res.status(400).send("잘못된 형식의 요청입니다.");
-
     try {
-        // 내 글인지 확인 필요
         const result = await Post.destroy({
             where: {
                 id: postId,
