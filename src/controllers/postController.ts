@@ -111,8 +111,7 @@ export const uploadPost = async (req: Request, res: Response) => {
             uploaderId,
             categoryId: finalCateogoryId,
         });
-        console.log(result);
-        return res.status(201).send("게시글 업로드 성공");
+        return res.status(201).json({ postId: result.id });
     } catch (error) {
         return res.status(500).send({ message: error });
     }
