@@ -24,13 +24,18 @@ export const getAllPosts = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
 export const getPostsAboutCategory = async (req: Request, res: Response) => {
     const categoryId = req.params.categoryId;
-    if (!categoryId) return res.status(400).send("잘못된 형식의 요청입니다.");
+    if (!categoryId)
+        return res
+            .status(400)
+            .json({
+                message: "잘못된 형식의 요청입니다. categoryId가 필요합니다.",
+            });
     try {
         const posts = await Post.findAndCountAll({
             // 개수와 전체 개시글 목록까지 반환
@@ -42,13 +47,18 @@ export const getPostsAboutCategory = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
 export const getPost = async (req: Request, res: Response) => {
     const postId = req.params.postId;
-    if (!postId) return res.status(400).send("잘못된 형식의 요청입니다.");
+    if (!postId)
+        return res
+            .status(400)
+            .json({
+                message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
+            });
     try {
         const post = await Post.findByPk(postId, {
             // 왜래키로 연결된 데이터 필드 가져오기
@@ -72,7 +82,7 @@ export const getPost = async (req: Request, res: Response) => {
         });
         return res.status(200).json(post);
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -83,9 +93,12 @@ export const uploadPost = async (req: Request, res: Response) => {
     const files = req.files as { [fieldname: string]: Express.MulterS3.File[] }; // 와 겨우 알았네
     // https://stackoverflow.com/questions/56491896/using-multer-and-express-with-typescript
     try {
-        if (!uploaderId) return res.status(401).send("Unauthorized");
+        if (!uploaderId)
+            return res.status(401).json({ message: "Unauthorized" });
         if (!categoryName || !title || !choice1 || !choice2)
-            return res.status(400).send("잘못된 형식의 요청입니다."); // 다른 데이터들 있는지 체크해야
+            return res
+                .status(400)
+                .json({ message: "잘못된 형식의 요청입니다." }); // 다른 데이터들 있는지 체크해야
         let finalCateogoryId;
         // 검색 후 하나 발견한 순간 정지
         const searchedCategory = await Category.findOne({
@@ -113,7 +126,7 @@ export const uploadPost = async (req: Request, res: Response) => {
         });
         return res.status(201).json({ postId: result.id });
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -128,7 +141,7 @@ export const getUserPosts = async (req: Request, res: Response) => {
         });
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -142,11 +155,11 @@ export const deletePost = async (req: Request, res: Response) => {
         });
         return res
             .status(result ? 200 : 204) // 204: 요청은 유효하나 해당 자원을
-            .send(
+            .json(
                 result ? "게시글 삭제 성공" : "해당 게시글이 존재하지 않습니다."
             );
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -156,7 +169,11 @@ export const getChoice = async (req: Request, res: Response) => {
     } = req;
     const uid = res.locals.uid;
     if (!postId)
-        return res.status(400).send("해당 게시글이 존재하지 않습니다.");
+        return res
+            .status(400)
+            .json({
+                message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
+            });
     try {
         const choiceTypeObj = await Choice.findOne({
             attributes: ["choiceType"],
@@ -167,7 +184,7 @@ export const getChoice = async (req: Request, res: Response) => {
         });
         return res.status(200).json(choiceTypeObj);
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -178,10 +195,17 @@ export const postChoice = async (req: Request, res: Response) => {
     } = req;
     const uid = res.locals.uid;
     if (choice === "")
-        return res.status(400).send("아무것도 선택하지 않았습니다.");
+        return res
+            .status(400)
+            .json({ message: "아무것도 선택하지 않았습니다." });
     const choiceType = Number(choice); // 꼭 숫자로 바꿔주자
     if (!postId || (choiceType !== 0 && choiceType !== 1))
-        return res.status(400).send("잘못된 형식의 요청입니다.");
+        return res
+            .status(400)
+            .json({
+                message:
+                    "잘못된 형식의 요청입니다. postId나 choiceType이 필요합니다.",
+            });
     try {
         // 기존 좋아요 찾기
         const prevChoice = await Choice.findOne({
@@ -193,9 +217,11 @@ export const postChoice = async (req: Request, res: Response) => {
             postId: Number(postId),
             choiceType: Boolean(choiceType),
         });
-        return res.status(201).send(created ? `선택 완료` : "변경 완료");
+        return res
+            .status(201)
+            .json({ message: created ? `선택 완료` : "변경 완료" });
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
 
@@ -212,8 +238,8 @@ export const cancelChoice = async (req: Request, res: Response) => {
                 postId,
             },
         });
-        return res.status(200).send("취소 완료");
+        return res.status(200).json({ message: "취소 완료" });
     } catch (error) {
-        return res.status(500).send({ message: error });
+        return res.status(500).json({ message: error });
     }
 };
