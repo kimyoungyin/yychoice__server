@@ -1,8 +1,7 @@
+import { PAGE_SIZE } from "assets/magicValues";
 import { Request, Response } from "express";
 import { Category, Choice, Post } from "models";
-import { Op } from "sequelize";
-
-const PAGE_SIZE = 10;
+import { getDescPaginationCondition } from "utils/getPaginationCondition";
 
 export const getAllPosts = async (
     req: Request<{}, {}, {}, { lastId?: string }>,
@@ -10,10 +9,6 @@ export const getAllPosts = async (
 ) => {
     try {
         const { lastId } = req.query;
-        const where =
-            lastId && parseInt(lastId)
-                ? { id: { [Op.lt]: parseInt(lastId, 10) } }
-                : undefined;
         const posts = await Post.findAll({
             attributes: [
                 "categoryId",
@@ -31,8 +26,7 @@ export const getAllPosts = async (
                 },
             ],
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
-            limit: PAGE_SIZE, // 개수 10개로 제한
-            where,
+            ...getDescPaginationCondition(lastId, PAGE_SIZE),
         });
         return res.status(200).json(posts);
     } catch (error) {
@@ -40,8 +34,12 @@ export const getAllPosts = async (
     }
 };
 
-export const getPostsAboutCategory = async (req: Request, res: Response) => {
+export const getPostsAboutCategory = async (
+    req: Request<{ categoryId: string }, {}, {}, { lastId?: string }>,
+    res: Response
+) => {
     const categoryId = req.params.categoryId;
+    const { lastId } = req.query;
     if (!categoryId)
         return res.status(400).json({
             message: "잘못된 형식의 요청입니다. categoryId가 필요합니다.",
@@ -49,11 +47,10 @@ export const getPostsAboutCategory = async (req: Request, res: Response) => {
     try {
         const posts = await Post.findAndCountAll({
             // 개수와 전체 개시글 목록까지 반환
-            where: {
-                categoryId,
-            },
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
-            limit: 10, // 개수 10개로 제한
+            ...getDescPaginationCondition(lastId, PAGE_SIZE, {
+                categoryId,
+            }),
         });
         return res.status(200).json(posts);
     } catch (error) {
