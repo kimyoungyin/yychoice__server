@@ -10,6 +10,16 @@ export const getAllPosts = async (
     try {
         const { lastId } = req.query;
         const posts = await Post.findAll({
+            attributes: [
+                "id",
+                "categoryId",
+                "choice1",
+                "choice1Url",
+                "choice2",
+                "choice2Url",
+                "title",
+                "createdAt",
+            ],
             // 왜래키로 연결된 데이터 필드 가져오기
             include: [
                 {
