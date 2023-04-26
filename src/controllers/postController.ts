@@ -1,8 +1,14 @@
+import { PAGE_SIZE } from "assets/magicValues";
 import { Request, Response } from "express";
 import { Category, Choice, Post } from "models";
+import { getDescPaginationCondition } from "utils/getPaginationCondition";
 
-export const getAllPosts = async (req: Request, res: Response) => {
+export const getAllPosts = async (
+    req: Request<{}, {}, {}, { lastId?: string }>,
+    res: Response
+) => {
     try {
+        const { lastId } = req.query;
         const posts = await Post.findAll({
             attributes: [
                 "categoryId",
@@ -20,7 +26,7 @@ export const getAllPosts = async (req: Request, res: Response) => {
                 },
             ],
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
-            limit: 10, // 개수 10개로 제한
+            ...getDescPaginationCondition(lastId, PAGE_SIZE),
         });
         return res.status(200).json(posts);
     } catch (error) {
@@ -28,22 +34,23 @@ export const getAllPosts = async (req: Request, res: Response) => {
     }
 };
 
-export const getPostsAboutCategory = async (req: Request, res: Response) => {
+export const getPostsAboutCategory = async (
+    req: Request<{ categoryId: string }, {}, {}, { lastId?: string }>,
+    res: Response
+) => {
     const categoryId = req.params.categoryId;
+    const { lastId } = req.query;
     if (!categoryId)
-        return res
-            .status(400)
-            .json({
-                message: "잘못된 형식의 요청입니다. categoryId가 필요합니다.",
-            });
+        return res.status(400).json({
+            message: "잘못된 형식의 요청입니다. categoryId가 필요합니다.",
+        });
     try {
         const posts = await Post.findAndCountAll({
             // 개수와 전체 개시글 목록까지 반환
-            where: {
-                categoryId,
-            },
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
-            limit: 10, // 개수 10개로 제한
+            ...getDescPaginationCondition(lastId, PAGE_SIZE, {
+                categoryId,
+            }),
         });
         return res.status(200).json(posts);
     } catch (error) {
@@ -54,11 +61,9 @@ export const getPostsAboutCategory = async (req: Request, res: Response) => {
 export const getPost = async (req: Request, res: Response) => {
     const postId = req.params.postId;
     if (!postId)
-        return res
-            .status(400)
-            .json({
-                message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
-            });
+        return res.status(400).json({
+            message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
+        });
     try {
         const post = await Post.findByPk(postId, {
             // 왜래키로 연결된 데이터 필드 가져오기
@@ -137,7 +142,7 @@ export const getUserPosts = async (req: Request, res: Response) => {
                 uploaderId: res.locals.uid,
             },
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
-            limit: 10, // 개수 10개로 제한
+            limit: PAGE_SIZE, // 개수 10개로 제한
         });
         return res.status(200).json(posts);
     } catch (error) {
@@ -169,11 +174,9 @@ export const getChoice = async (req: Request, res: Response) => {
     } = req;
     const uid = res.locals.uid;
     if (!postId)
-        return res
-            .status(400)
-            .json({
-                message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
-            });
+        return res.status(400).json({
+            message: "잘못된 형식의 요청입니다. postId가 필요합니다.",
+        });
     try {
         const choiceTypeObj = await Choice.findOne({
             attributes: ["choiceType"],
@@ -200,12 +203,10 @@ export const postChoice = async (req: Request, res: Response) => {
             .json({ message: "아무것도 선택하지 않았습니다." });
     const choiceType = Number(choice); // 꼭 숫자로 바꿔주자
     if (!postId || (choiceType !== 0 && choiceType !== 1))
-        return res
-            .status(400)
-            .json({
-                message:
-                    "잘못된 형식의 요청입니다. postId나 choiceType이 필요합니다.",
-            });
+        return res.status(400).json({
+            message:
+                "잘못된 형식의 요청입니다. postId나 choiceType이 필요합니다.",
+        });
     try {
         // 기존 좋아요 찾기
         const prevChoice = await Choice.findOne({
