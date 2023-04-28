@@ -24,8 +24,10 @@ export class Post extends Model<
     declare categoryId: ForeignKey<Category["id"]>;
     declare title: string;
     declare choice1: string;
+    declare choice1Count: number;
     declare choice1Url: string | null;
     declare choice2: string;
+    declare choice2Count: number;
     declare choice2Url: string | null;
     declare uploaderId: string;
 
@@ -81,6 +83,11 @@ Post.init(
             type: Sequelize.STRING,
             allowNull: true,
         },
+        choice1Count: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
         choice2: {
             type: Sequelize.STRING(20),
             allowNull: false,
@@ -88,6 +95,11 @@ Post.init(
         choice2Url: {
             type: Sequelize.STRING,
             allowNull: true,
+        },
+        choice2Count: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
         },
         uploaderId: {
             type: Sequelize.STRING(28),

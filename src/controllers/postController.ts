@@ -15,10 +15,13 @@ export const getAllPosts = async (
                 "categoryId",
                 "choice1",
                 "choice1Url",
+                "choice1Count",
                 "choice2",
                 "choice2Url",
+                "choice2Count",
                 "title",
                 "createdAt",
+                "updatedAt",
             ],
             // 왜래키로 연결된 데이터 필드 가져오기
             include: [
@@ -72,19 +75,15 @@ export const getPost = async (req: Request, res: Response) => {
             attributes: [
                 "id",
                 "categoryId",
-                "title",
                 "choice1",
                 "choice1Url",
+                "choice1Count",
                 "choice2",
                 "choice2Url",
-                "uploaderId",
+                "choice2Count",
+                "title",
                 "createdAt",
-            ],
-            include: [
-                {
-                    model: Choice, // join할 모델
-                    attributes: ["choiceType"], // select해서 표시할 필드 지정
-                },
+                "updatedAt",
             ],
         });
         return res.status(200).json(post);
@@ -125,9 +124,11 @@ export const uploadPost = async (req: Request, res: Response) => {
             choice1Url: Array.isArray(files.choice1Image)
                 ? files.choice1Image[0].location
                 : null,
+            choice1Count: 0,
             choice2Url: Array.isArray(files.choice1Image)
                 ? files.choice2Image[0].location
                 : null,
+            choice2Count: 0,
             uploaderId,
             categoryId: finalCateogoryId,
         });
@@ -143,6 +144,19 @@ export const getUserPosts = async (req: Request, res: Response) => {
             where: {
                 uploaderId: res.locals.uid,
             },
+            attributes: [
+                "id",
+                "categoryId",
+                "choice1",
+                "choice1Url",
+                "choice1Count",
+                "choice2",
+                "choice2Url",
+                "choice2Count",
+                "title",
+                "createdAt",
+                "updatedAt",
+            ],
             order: [["createdAt", "DESC"]], // 이차원 배열로 순서 구현(내림차순)
             limit: PAGE_SIZE, // 개수 10개로 제한
         });
@@ -187,7 +201,7 @@ export const getChoice = async (req: Request, res: Response) => {
                 postId,
             },
         });
-        return res.status(200).json(choiceTypeObj);
+        return res.status(200).json(choiceTypeObj); // 나중에 null인 경우에 객체로 수정
     } catch (error) {
         return res.status(500).json({ message: error });
     }
@@ -220,6 +234,18 @@ export const postChoice = async (req: Request, res: Response) => {
             postId: Number(postId),
             choiceType: Boolean(choiceType),
         });
+        const postToIncreOrDecre = await Post.findByPk(postId);
+        if (!created) {
+            // 기존 걸 제거합니다
+            await postToIncreOrDecre?.decrement(
+                choiceType === 0 ? "choice2Count" : "choice1Count",
+                { by: 1 }
+            );
+        }
+        await postToIncreOrDecre?.increment(
+            choiceType === 0 ? "choice1Count" : "choice2Count",
+            { by: 1 }
+        );
         return res
             .status(201)
             .json({ message: created ? `선택 완료` : "변경 완료" });
@@ -234,6 +260,20 @@ export const cancelChoice = async (req: Request, res: Response) => {
     } = req;
     const uid = res.locals.uid;
     try {
+        const choiceObj = await Choice.findOne({
+            attributes: ["choiceType"],
+            where: {
+                uid,
+                postId,
+            },
+        });
+        const postToDecre = await Post.findByPk(postId);
+        if (choiceObj?.choiceType !== undefined && postToDecre) {
+            await postToDecre.decrement(
+                choiceObj.choiceType ? "choice2Count" : "choice1Count",
+                { by: 1 }
+            );
+        }
         // 1이면 삭제함, 0이면 원래 없던 것
         const result = await Choice.destroy({
             where: {
