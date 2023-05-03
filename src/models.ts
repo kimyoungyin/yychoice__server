@@ -18,9 +18,9 @@ export class Category extends Model<
 
 export class Post extends Model<
     InferAttributes<Post>,
-    InferCreationAttributes<Post>
+    InferCreationAttributes<Post> // creation 시에 optional로 작용할 프로퍼티(id)가 있음을 알림
 > {
-    declare id: CreationOptional<number>;
+    declare id: CreationOptional<number>; // creation 시에는 id 프로퍼티가 필요 없기 때문에
     declare categoryId: ForeignKey<Category["id"]>;
     declare title: string;
     declare choice1: string;
@@ -31,7 +31,7 @@ export class Post extends Model<
     declare choice2Url: string | null;
     declare uploaderId: string;
 
-    declare createdAt: CreationOptional<Date>;
+    declare createdAt: CreationOptional<Date>; // 이것도 생성 시에는 입력할 필요 없는 것들
     declare updatedAt: CreationOptional<Date>;
 }
 export class Choice extends Model<
@@ -58,9 +58,14 @@ Category.init(
         },
     },
     {
-        tableName: "categories",
+        sequelize, // db.sequelize로, 나중에 연결해줌
         timestamps: false,
-        sequelize,
+        underscored: false, // true로 하면 테이블 명과 컬럼 명을 스네이크 케이스로 바꿈
+        modelName: "Cateogry",
+        tableName: "categories",
+        paranoid: false, // deletedAt 컬럼 생성. 나중에 복원하려는 경우
+        charset: "utf8mb4", // 한글이 가능하려면 utf8, 이모지 가능하게 하려면 utf8mb4
+        collate: "utf8mb4_general_ci", // 한글이 가능하려면 utf8_general_ci, 이모지 가능하게 하려면 utf8mb4_general_ci
     }
 );
 
@@ -108,7 +113,16 @@ Post.init(
         createdAt: DataTypes.DATE,
         updatedAt: DataTypes.DATE,
     },
-    { tableName: "posts", timestamps: true, sequelize }
+    {
+        sequelize, // db.sequelize로, 나중에 연결해줌
+        timestamps: true,
+        underscored: false, // true로 하면 테이블 명과 컬럼 명을 스네이크 케이스로 바꿈
+        modelName: "Post",
+        tableName: "posts",
+        paranoid: false, // deletedAt 컬럼 생성. 나중에 복원하려는 경우
+        charset: "utf8mb4", // 한글이 가능하려면 utf8, 이모지 가능하게 하려면 utf8mb4
+        collate: "utf8mb4_general_ci", // 한글이 가능하려면 utf8_general_ci, 이모지 가능하게 하려면 utf8mb4_general_ci
+    }
 );
 
 Choice.init(
@@ -127,5 +141,14 @@ Choice.init(
             allowNull: false,
         },
     },
-    { tableName: "choices", timestamps: false, sequelize }
+    {
+        sequelize, // db.sequelize로, 나중에 연결해줌
+        timestamps: false,
+        underscored: false, // true로 하면 테이블 명과 컬럼 명을 스네이크 케이스로 바꿈
+        modelName: "Choice",
+        tableName: "choices",
+        paranoid: false, // deletedAt 컬럼 생성. 나중에 복원하려는 경우
+        charset: "utf8", // 한글이 가능하려면 utf8, 이모지 가능하게 하려면 utf8mb4
+        collate: "utf8_general_ci", // 한글이 가능하려면 utf8_general_ci, 이모지 가능하게 하려면 utf8mb4_general_ci
+    }
 );
