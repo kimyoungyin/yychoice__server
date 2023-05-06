@@ -189,7 +189,7 @@ export const getChoice = async (req: Request, res: Response) => {
                 postId,
             },
         });
-        return res.status(200).json(choiceTypeObj); // 나중에 null인 경우에 객체로 수정
+        return res.status(200).json(choiceTypeObj || { choiceType: null }); // 나중에 null인 경우에 객체로 수정
     } catch (error) {
         return res.status(500).json({ message: error });
     }
