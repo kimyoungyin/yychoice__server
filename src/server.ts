@@ -9,8 +9,6 @@ import { Category, Choice, Post } from "models";
 
 const PORT = 4000;
 
-const logger = morgan("dev");
-
 const app = express();
 
 app.use(express.json());
@@ -23,7 +21,11 @@ app.use(
     })
 );
 
-app.use(logger);
+if (process.env.NODE_ENV === "production") {
+    app.use(morgan("combined"));
+} else {
+    app.use(morgan("dev"));
+}
 app.use("/posts", postRouter);
 app.use("/categories", categoryRouter);
 
