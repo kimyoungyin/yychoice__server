@@ -6,7 +6,7 @@ import Sequelize, {
     InferCreationAttributes,
     Model,
 } from "sequelize";
-import sequelize from "database";
+import sequelize from "./database";
 
 export class Category extends Model<
     InferAttributes<Category>,

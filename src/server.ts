@@ -1,13 +1,16 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import categoryRouter from "routers/categoryRouter";
-import postRouter from "routers/postRouter";
-import sequelize from "database";
-import { Category, Choice, Post } from "models";
+import categoryRouter from "./routers/categoryRouter";
+import postRouter from "./routers/postRouter";
+import sequelize from "./database";
+import { Category, Choice, Post } from "./models";
+import logger from "./logger";
+import helmet from "helmet";
+import hpp from "hpp";
 // 꼭 가져와야 sync가 정상 작동한다.
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 const app = express();
 
@@ -16,19 +19,27 @@ app.use(express.urlencoded({ extended: true })); // body 접근 가능
 
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: `http://localhost:3000`,
         credentials: true,
     })
 );
 
 if (process.env.NODE_ENV === "production") {
     app.use(morgan("combined"));
+    app.use(helmet({ contentSecurityPolicy: false })); // 복잡한 설정이므로 꺼주는 contentSecurityPolicy
+    app.use(hpp());
 } else {
     app.use(morgan("dev"));
 }
+
 app.use("/posts", postRouter);
 app.use("/categories", categoryRouter);
 
+app.use((req, res, next) => {
+    const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+    logger.error(error.message);
+    res.status(404).json(error.message);
+});
 // association
 Post.belongsTo(Category, {
     constraints: true,
@@ -40,7 +51,7 @@ Choice.belongsTo(Post, { constraints: true, as: "post", onDelete: "CASCADE" });
 Post.hasMany(Choice, { sourceKey: "id", foreignKey: "postId" }); // foreignKey를 설정해야 model의 왜래 키를 인식한다.
 
 const handleListening = () =>
-    console.log(`✅ Server listenting on port http://localhost:${PORT} 🚀`);
+    logger.info(`✅ Server listenting on port http://localhost:${PORT} 🚀`);
 
 sequelize
     .sync()
@@ -49,4 +60,4 @@ sequelize
     .then(() => {
         app.listen(PORT, handleListening);
     })
-    .catch((error) => console.log(error));
+    .catch((error) => logger.error(error));

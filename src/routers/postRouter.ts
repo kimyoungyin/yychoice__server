@@ -10,7 +10,8 @@ import {
     postChoice,
     uploadPost,
 } from "../controllers/postController";
-import { decodeToken, deleteAWSImage, uploadFiles } from "../middlewares";
+import { deleteAWSImage, uploadFiles } from "../middlewares/s3Middlewares";
+import decodeToken from "../middlewares/decodeToken";
 
 const postRouter = express.Router();
 
