@@ -21,12 +21,18 @@ app.use(
     cors({
         origin: `http://localhost:3000`,
         credentials: true,
+        optionsSuccessStatus: 200,
     })
 );
 
 if (process.env.NODE_ENV === "production") {
     app.use(morgan("combined"));
-    app.use(helmet({ contentSecurityPolicy: false })); // 복잡한 설정이므로 꺼주는 contentSecurityPolicy
+    app.use(
+        helmet({
+            contentSecurityPolicy: false,
+            crossOriginEmbedderPolicy: false,
+        })
+    ); // 복잡한 설정이므로 꺼주는 contentSecurityPolicy
     app.use(hpp());
 } else {
     app.use(morgan("dev"));
