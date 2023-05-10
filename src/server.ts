@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -5,11 +7,10 @@ import categoryRouter from "./routers/categoryRouter";
 import postRouter from "./routers/postRouter";
 import sequelize from "./database";
 import { Category, Choice, Post } from "./models";
+// 꼭 가져와야 sync가 정상 작동한다.
 import logger from "./logger";
 import helmet from "helmet";
 import hpp from "hpp";
-// 꼭 가져와야 sync가 정상 작동한다.
-
 const PORT = process.env.PORT || 4000;
 
 const app = express();
