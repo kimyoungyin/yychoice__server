@@ -4,3 +4,4 @@ uploads
 src/config/serviceAccount.json
 logs
 dist
+aws-ec2-keypair.pem

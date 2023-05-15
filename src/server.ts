@@ -35,7 +35,7 @@ sequelize
     .then(() => {
         app.listen(app.get("port"), handleListening);
     })
-    .catch((error) => logger.error(error));
+    .catch((error) => logger.error("database error:", error));
 
 if (process.env.NODE_ENV === "production") {
     app.use(morgan("combined"));
