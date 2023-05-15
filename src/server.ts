@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import morgan from "morgan";
 import categoryRouter from "./routers/categoryRouter";
 import postRouter from "./routers/postRouter";
@@ -26,9 +26,7 @@ Choice.belongsTo(Post, { constraints: true, as: "post", onDelete: "CASCADE" });
 Post.hasMany(Choice, { sourceKey: "id", foreignKey: "postId" }); // foreignKey를 설정해야 model의 왜래 키를 인식한다.
 
 const handleListening = () =>
-    logger.info(
-        `✅ Server listenting on port http://localhost:${app.get("port")} 🚀`
-    );
+    logger.info(`✅ Server listenting on port ${app.get("port")} 🚀`);
 
 sequelize
     .sync({ force: false })
@@ -56,14 +54,20 @@ if (process.env.NODE_ENV === "production") {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // body 접근 가능
 
+const whitelist = ["http://localhost:3000"];
+const corsOptions: CorsOptions = {
+    credentials: true,
+    optionsSuccessStatus: 200,
+    origin: function (origin, callback) {
+        if (origin && whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+};
 // 필요없나?
-app.use(
-    cors({
-        origin: `http://localhost:3000`,
-        credentials: true,
-        optionsSuccessStatus: 200,
-    })
-);
+app.use(cors(corsOptions));
 
 app.use("/posts", postRouter);
 app.use("/categories", categoryRouter);
