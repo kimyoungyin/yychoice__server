@@ -29,7 +29,7 @@ const sequelize = new Sequelize(
     process.env.DATABASE_DATABASE as string,
     process.env.DATABASE_USER as string,
     process.env.DATABASE_PASSWORD as string,
-    { dialect: "mysql", host: process.env.DATABASE_HOST as string }
+    { dialect: "mysql", host: process.env.DATABASE_HOST as string, port: 3306 }
 );
 
 export default sequelize;
