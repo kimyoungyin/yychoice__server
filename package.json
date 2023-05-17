@@ -37,7 +37,8 @@
     "scripts": {
         "dev": "nodemon --watch src --exec 'npx' 'ts-node' ./src/server.ts",
         "build": "tsc",
-        "start": "cross-env NODE_ENV=production PORT=80 pm2 start ./dist/server.js -i -1"
+        "start": "cross-env NODE_ENV=production PORT=80 pm2 start ./dist/server.js -i -1",
+        "reload": "tsc && pm2 reload ./dist/server.js"
     },
     "author": "kimyoungyin",
     "license": "MIT",
