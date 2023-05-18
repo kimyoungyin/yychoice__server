@@ -16,6 +16,19 @@ export const getAllPosts = async (
         const { lastId } = req.query;
         const posts = await Post.findAll({
             // 왜래키로 연결된 데이터 필드 가져오기
+            attributes: [
+                "id",
+                "categoryId",
+                "choice1",
+                "choice1Url",
+                "choice1Count",
+                "choice2",
+                "choice2Url",
+                "choice2Count",
+                "title",
+                "createdAt",
+                "updatedAt",
+            ],
             include: [
                 {
                     model: Category, // join할 모델
@@ -75,19 +88,6 @@ export const getPost = async (req: Request, res: Response) => {
     try {
         const post = await Post.findByPk(postId, {
             // 왜래키로 연결된 데이터 필드 가져오기
-            attributes: [
-                "id",
-                "categoryId",
-                "choice1",
-                "choice1Url",
-                "choice1Count",
-                "choice2",
-                "choice2Url",
-                "choice2Count",
-                "title",
-                "createdAt",
-                "updatedAt",
-            ],
         });
         return res.status(200).json(post);
     } catch (error) {
