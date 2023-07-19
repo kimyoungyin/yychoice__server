@@ -54,10 +54,7 @@ if (process.env.NODE_ENV === "production") {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // body 접근 가능
 
-const whitelist = [
-    "http://localhost:3000",
-    "https://develop--yychoice.netlify.app",
-];
+const whitelist = ["http://localhost:3000"];
 const corsOptions: CorsOptions = {
     credentials: true,
     optionsSuccessStatus: 200,
