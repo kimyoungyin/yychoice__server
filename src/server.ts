@@ -53,7 +53,9 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // body 접근 가능
-
+app.get("/check", (req, res) => {
+    return res.json({ result: "success" });
+});
 const whitelist = ["http://localhost:3000"];
 const corsOptions: CorsOptions = {
     credentials: true,
