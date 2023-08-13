@@ -56,7 +56,7 @@ app.use(express.urlencoded({ extended: true })); // body 접근 가능
 app.get("/check", (req, res) => {
     return res.json({ result: "success" });
 });
-const whitelist = ["http://localhost:3000"];
+const whitelist = ["http://localhost:3000", "https://yychoice.netlify.app"];
 const corsOptions: CorsOptions = {
     credentials: true,
     optionsSuccessStatus: 200,
